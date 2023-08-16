@@ -19,7 +19,7 @@ import os
 import sys
 import pkg_resources
 
-__version__ = '0.0.1'
+__version__ = '1.3.0'
 PACKAGE_NAME = 'eventstreams_sdk'
 PACKAGE_DESC = 'Event Streams Python SDK'
 
@@ -44,7 +44,7 @@ with open("README.md", "r") as fh:
     readme = fh.read()
 
 setup(
-    name=PACKAGE_NAME.replace('_', '-'),
+    name=PACKAGE_NAME,
     version=__version__,
     description=PACKAGE_DESC,
     license='Apache 2.0',
