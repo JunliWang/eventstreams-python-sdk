@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.com/IBM/eventstreams-python-sdk.svg?&branch=main)](https://travis-ci.com/IBM/eventstreams-python-sdk)
 [![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
-# IBM Cloud Event Streams Python SDK Version 1.1.0
+# IBM Cloud Event Streams Python SDK Version 1.3.0
 
 ## Introduction
 
@@ -10,7 +10,7 @@ It is optimized for event ingestion into IBM Cloud and event stream distribution
 Event Streams provides a REST API to help connect your existing systems to your Event Streams Kafka cluster. 
 Using the API, you can integrate Event Streams with any system that supports RESTful APIs.
 
-Documentation [IBM Cloud Eventstreams Service APIs](https://cloud.ibm.com/apidocs/event-streams).
+Documentation [IBM Cloud Event Streams Service APIs](https://cloud.ibm.com/apidocs/event-streams).
 
 ## Table of Contents
 
@@ -41,7 +41,7 @@ Documentation [IBM Cloud Eventstreams Service APIs](https://cloud.ibm.com/apidoc
 
 ## Overview
 
-The IBM Cloud Eventstreams SDK Python SDK allows developers to programmatically interact with the following
+The IBM Cloud Event Streams SDK Python SDK allows developers to programmatically interact with the following
 IBM Cloud services:
 
 Service Name | Imported Class Name
@@ -53,21 +53,21 @@ Service Name | Imported Class Name
 * An [IBM Cloud](https://cloud.ibm.com/registration) account.
 * The [IBM Cloud CLI.](https://cloud.ibm.com/docs/cli?topic=cli-getting-started)
 * An IAM API key to allow the SDK to access your account. Create one [here](https://cloud.ibm.com/iam/apikeys).
-* A IBM Cloud Eventstreams Instance Create one [here](https://cloud.ibm.com/registration?target=/catalog/services/event-streams)
+* A IBM Cloud Event Streams Instance Create one [here](https://cloud.ibm.com/registration?target=/catalog/services/event-streams)
 * Python 3.6 or above.
 
 ## Installation
 
-To install, use `pip3` or `easy_install3.5`:
+To install, use `pip` or `easy_install3.5`:
 
 ```bash
-pip3 install --upgrade "eventstreams_sdk>=1.1.0"
+pip install --upgrade "eventstreams_sdk>=1.3.0"
 ```
 
 or
 
 ```bash
-easy_install3.5 --upgrade "eventstreams_sdk>=1.1.0"
+easy_install3.5 --upgrade "eventstreams_sdk>=1.3.0"
 ```
 
 ## Using the SDK
@@ -111,11 +111,6 @@ operations:
   - [List which topics are mirrored](#list-current-mirroring-topic-selection)
   - [Replace selection of topics which are mirrored](#replace-selection-of-topics-which-are-mirrored)
   - [List active mirroring topics](#list-active-mirroring-topics)
-  - [Create a Kafka quota](#creating-a-kafka-quota)
-  - [List Kafka quotas](#listing-kafka-quotas)
-  - [Get a Kafka quota](#getting-a-kafka-quota)
-  - [Delete a Kafka quota](#deleting-a-kafka-quota)
-  - [Update a Kafka quota information](#updating-kafka-quotas-information)
   
 The Admin REST API is also [documented using swagger](./admin-rest-api.yaml).
 
@@ -138,7 +133,7 @@ $ibmcloud resource service-key "${service_instance_key_name}" --output json > jq
 ## Environment Setup
 In the examples you must set and export environment variables as follows:
 - Either the `API_KEY` or `BEARER_TOKEN` to use for authentication.
-- `KAFKA_ADMIN_URL` to point to your Eventstreams admin endpoint.
+- `KAFKA_ADMIN_URL` to point to your Event Streams admin endpoint.
 
 In addition, the `Content-type` header has to be set to `application/json`.
 
@@ -633,217 +628,5 @@ def get_list_mirroring_active_topics(service):
         print("\tactive mirroring topics updated:")
     except:
         print("\tError Listing Active Mirroring Topics:")  
-    # func.End
-```
-### Creating a Kafka quota
----
-To create a Kafka quota the admin REST SDK issues a POST request to the /admin/quotas/ENTITYNAME path (where `ENTITYNAME` is the name of the entity that you want to create. The entity name of the quota can be `default` or an IAM Service ID that starts with an `iam-ServiceId` prefix).
-The body of the request contains a JSON document, for example:
-```json
-{
-    "producer_byte_rate": 1024,
-    "consumer_byte_rate": 1024
-}
-```
-
-Create Quota would create either 1 or 2 quotas depending on what data is passed in.
-
-Expected HTTP status codes:
-
-- 201: Quota creation request was created.
-- 400: Invalid request JSON.
-- 403: Not authorized to create quota.
-- 422: Semantically invalid request.
-
-If the request to create a Kafka quota succeeds then HTTP status code 201 (Created) is returned. If the operation fails then a HTTP status code of 422 (Un-processable Entity) is returned, and a JSON object containing additional information about the failure is returned as the body of the response.
-
-
-
-
-#### Example
-
-```python
-def create_quota(service,entity_name):
-    configs = []
-
-    # Invoke create method.
-    try:
-        response = service.create_quota(
-            entity_name=entity_name,
-            producer_byte_rate=1024,
-            consumer_byte_rate=1024
-        )
-        if response.status_code == HTTPStatus.CREATED :  
-            print("\tQuota created: " + entity_name)
-    except:
-        print("\tError Creating Quota: " + entity_name)
-    # func.End
-```
-
-
-### Deleting a Kafka quota
----
-To delete a Kafka quota, the admin REST SDK issues a DELETE request to the `/admin/quotas/ENTITYNAME`
-path (where `ENTITYNAME` is the name of the entity that you want to delete. The entity name of the quota can be `default` or an IAM Service ID that starts with an `iam-ServiceId` prefix).
-
-Expected return codes:
-- 202: Quota deletion request was accepted.
-- 403: Not authorized to delete quota.
-- 404: Entity Quota does not exist.
-- 422: Semantically invalid request.
-  
-A 202 (Accepted) status code is returned if the REST API accepts the delete
-request or status code 422 (Un-processable Entity) if the delete request is
-rejected. If a delete request is rejected then the body of the HTTP response
-will contain a JSON object which provides additional information about why
-the request was rejected.
-
-#### Example
-
-```python
-def delete_quota(service,entity_name):
-    # Lets try to delete it.
-    try:
-        response = service.delete_quota(
-            entity_name,
-            )
-        if response.status_code == HTTPStatus.ACCEPTED: 
-            print("\tQuota deleted: "+entity_name)
-    except:
-        print("\tError Deleting Quota: " + entity_name)
-    # func.End
-```
-
-### Listing Kafka quotas
----
-You can list all of your Kafka quotas by issuing a GET request to the
-`/admin/quotas` path.
-
-Expected status codes:
-- 200: quotas list is returned as JSON in the following format:
-```json
-{
-  "data": [
-    {
-      "entity_name": "default",
-      "producer_byte_rate": 1024,
-      "consumer_byte_rate": 1024
-    },
-    {
-      "entity_name": "iam-ServiceId-38288dac-1f80-46dd-b135-a56153296bcd",
-      "producer_byte_rate": 1024
-    },
-    {
-      "entity_name": "iam-ServiceId-38288dac-1f80-46dd-b135-e56153296fgh",
-      "consumer_byte_rate": 2048
-    },
-    {
-      "entity_name": "iam-ServiceId-38288dac-1f80-46dd-b135-f56153296bfa",
-      "producer_byte_rate": 2048,
-      "consumer_byte_rate": 1024
-    }
-  ]
-}
-```
-
-A successful response will have HTTP status code 200 (OK) and contain an
-array of JSON objects, where each object represents a Kafka quota and has the
-following properties:
-
-| Property name     | Description                                             |
-|-------------------|---------------------------------------------------------|
-| entity_name       | The entity name of the quota can be `default` or an IAM Service ID that starts with an `iam-ServiceId` prefix.                           |
-| producer_byte_rate| The producer byte rate quota value.            |
-| consumer_byte_rate| The consumer byte rate quota value.            |
-
-#### Example
-
-```python
-def list_quotas(service):
-    # Invoke list method.
-    try:
-        response = service.list_quotas()
-
-        if response.status_code == HTTPStatus.OK:
-            if not response.result :
-                print("\tNothing to List")
-                return
-            for quota in response.result["data"]:
-                quota_details = "entity_name: "+ quota["entity_name"]
-                if "producer_byte_rate" in quota:
-                    quota_details += ", producer_byte_rate: "+ str(quota["producer_byte_rate"])
-                if "consumer_byte_rate" in quota:
-                    quota_details += ", consumer_byte_rate: "+ str(quota["consumer_byte_rate"])
-                print("\t"+quota_details)
-    except:
-        print("\tError Listing Quotas")
-    # func.end
-```
-
-### Getting a Kafka quota
----
-To get a Kafka quota detail information, issue a GET request to the `/admin/quotas/ENTITYNAME`
-path (where `ENTITYNAME` is the name of the entity that you want to get. The entity name of the quota can be `default` or an IAM Service ID that starts with an `iam-ServiceId` prefix).
-
-Expected status codes
-- 200: Retrieve quota details successfully in following format:
-```json
-{
-  "producer_byte_rate": 1024,
-  "consumer_byte_rate": 1024
-}
-```
-- 403: Not authorized.
-
-#### Example
-
-```python
-def quota_details(service,entity_name):
-    # Invoke get method.
-    try:
-        response = service.get_quota(
-            entity_name,
-            )
-        if response.status_code == HTTPStatus.OK:  
-            for key, value in response.result.items(): 
-                print("\t" +key + ":" + str(value) )
-    except:
-        print("\tError Getting Quota Details: " + entity_name)
-    # func.End 
-```
-
-### Updating Kafka quota's information
----
-To Update an entity's quota, issue a
-`PATCH` request to `/admin/quotas/ENTITYNAME` with the following body:
-(where `ENTITYNAME` is the name of the entity that you want to update. The entity name of the quota can be `default` or an IAM Service ID that starts with an `iam-ServiceId` prefix).
-```json
-{
-  "producer_byte_rate": 2048,
-  "consumer_byte_rate": 2048
-}
-```
-
-Expected status codes
-- 202: Update quota request was accepted.
-- 400: Invalid request JSON.
-- 404: Entity quota specified does not exist.
-- 422: Semantically invalid request.
-
-#### Example
-
-```python
-def update_quota(service,entity_name):
-    # Invoke update method.
-    try:
-        response = service.update_quota(
-            entity_name,
-            producer_byte_rate=2048,
-            consumer_byte_rate=2048
-        )
-        if response.status_code == HTTPStatus.ACCEPTED:
-            print("\tQuota updated: " + entity_name)
-    except:
-        print("\tError Updating Quota Details: " + entity_name)
     # func.End
 ```
